@@ -81,7 +81,6 @@ public class MySqlProductRepository : IProductRepository
                 }
             }
         }
-
         return products;
     }
 
@@ -115,5 +114,36 @@ public class MySqlProductRepository : IProductRepository
         }
 
         return product;
+    }
+
+    public void AddProduct(string name, decimal price, int quantity)
+    {
+        int status = 0;
+        if (quantity <= 0)
+        {
+            status = 1;
+        }
+        else if (quantity < 10)
+        {
+            status = 2;
+        }
+        else
+        {
+            status = 3;
+        }
+        using (var connection = new MySqlConnection(_connectionString))
+        {
+            connection.Open();
+            string insertSql = "INSERT INTO product (name, price, quantity, status) VALUES (@name, @price, @quantity, @status)";
+            using (MySqlCommand cmd = new MySqlCommand(insertSql, connection))
+            {
+                cmd.Parameters.AddWithValue("@name", name);
+                cmd.Parameters.AddWithValue("@price", price);
+                cmd.Parameters.AddWithValue("@quantity", quantity);
+                cmd.Parameters.AddWithValue("@status", status);
+                
+                cmd.ExecuteNonQuery();
+            }
+        }
     }
 }
