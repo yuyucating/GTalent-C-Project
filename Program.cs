@@ -1,6 +1,9 @@
-﻿
+﻿// namespace InventorySystem;
+
 using InventorySystem.Models;
 using InventorySystem.Repositories;
+using InventorySystem.Services;
+using InventorySystem.Utils;
 
 /* Server: mysql所在伺服器位址(localhost or ip xxx.xxx.xxx.xxx);
  Port: mysql端口 (預設 3306);
@@ -10,6 +13,15 @@ using InventorySystem.Repositories;
 const string MYSQL_CONNECTION_STRING = "Server=localhost;Port=3306;Database=inventory_db;uid=root;pwd=plutomarsD1206";
 
 MySqlProductRepository productRepository = new MySqlProductRepository(MYSQL_CONNECTION_STRING);
+InventoryService inventoryService = new InventoryService(productRepository);
+
+//通知功能相關
+// 使用 EmailNotifier
+EmailNotifier emailNotifier = new EmailNotifier();
+NotificationService emailService = new NotificationService(emailNotifier);
+// 使用 SmsNotifier
+SmsNotifier  smsNotifier = new SmsNotifier();
+NotificationService smsService = new NotificationService(smsNotifier);
 
 RunMenu();
 
@@ -27,6 +39,8 @@ void RunMenu()
     break;
    case "3": AddProduct();
     break;
+   case "4": UpdateProduct();
+    break;
    case "0":
     Console.WriteLine("Goodbye");
     return;
@@ -41,13 +55,15 @@ void DisplayMenu()
  Console.WriteLine("1. Get all product");
  Console.WriteLine("2. Search product");
  Console.WriteLine("3. Add product");
+ Console.WriteLine("4. Update product");
  Console.WriteLine("0. Exit");
 }
 
 void GetAllProducts()
 {
  Console.WriteLine("\n=== All product list ===");
- var products = productRepository.GetAllProducts();
+ // var products = productRepository.GetAllProducts();
+ var products = inventoryService.GetAllProducts();
  if (products.Any()) // .Any() 去了解 products 有沒有元素 (而不是單純 products 存不存在)
  {
   Console.WriteLine("---------------------------------------");
@@ -58,6 +74,7 @@ void GetAllProducts()
    Console.WriteLine(product);
   }
   Console.WriteLine("---------------------------------------");
+  emailService.NotifyUser("Mickey", "Finish searching.");
  }
 }
 
@@ -65,11 +82,9 @@ void SearchProduct()
 {
  Console.WriteLine("\n=== Key in the product ID ===");
  int input = ReadIntInput();
- // string s = Console.ReadLine();
- // int input = ReadInt(s);
  
-
- var product = productRepository.GetProductById(input);
+ // InventoryService inventoryService = new InventoryService(productRepository);
+ var product = inventoryService.GetProductByID(input);
  if (product!=null)
  {
   Console.WriteLine("---------------------------------------");
@@ -80,7 +95,8 @@ void SearchProduct()
  }
 }
 
-void AddProduct(){
+void AddProduct()
+{
  Console.WriteLine("\nPlease key in product name:");
  string name = Console.ReadLine();
  Console.WriteLine("\nPlease key in product price:");
@@ -88,7 +104,35 @@ void AddProduct(){
  Console.WriteLine("\nPlease key in product quantity:");
  int quantity = ReadIntInput();
  Console.WriteLine($"Product name:{name}, Price:{price}, Quantity:{quantity}");
- productRepository.AddProduct(name, price, quantity);
+ // productRepository.AddProduct(name, price, quantity);
+ 
+ smsService.NotifyUser("Mickey", $"Finish adding product: {name}.");
+ inventoryService.AddProduct(name, price , quantity);
+}
+
+void UpdateProduct()
+{
+ Console.WriteLine("\nPlease key in product id:");
+ int id = ReadIntInput(1);
+ 
+ // 找到對應產品
+ Product product = inventoryService.GetProductByID(id);
+ string name = product.Name;
+ decimal price = product.Price;
+ int quantity = product.Quantity;
+
+ if (product != null)
+ {
+  Console.WriteLine("\nPlease key in new product name:");
+  name = Console.ReadLine();
+  Console.WriteLine("\nPlease key in new product price:");
+  price = ReadDecimalInput();
+  Console.WriteLine("\nPlease key in new product quantity:");
+  quantity = ReadIntInput();
+  
+  // 進行更新
+  inventoryService.UpdateProduct(product, name, price, quantity);
+ }
 }
 
 // 確定輸入為數字格式
