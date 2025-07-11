@@ -4,6 +4,8 @@ using InventorySystem.Models;
 using InventorySystem.Repositories;
 using InventorySystem.Services;
 using InventorySystem.Utils;
+using System;
+using System.Collections.Generic;
 
 /* Server: mysql所在伺服器位址(localhost or ip xxx.xxx.xxx.xxx);
  Port: mysql端口 (預設 3306);
@@ -12,7 +14,43 @@ using InventorySystem.Utils;
  pwd: mysql使用者密碼*/
 const string MYSQL_CONNECTION_STRING = "Server=localhost;Port=3306;Database=inventory_db;uid=root;pwd=plutomarsD1206";
 
-MySqlProductRepository productRepository = new MySqlProductRepository(MYSQL_CONNECTION_STRING);
+string connectionString = "";
+string configFile = "appsettings.ini";
+
+if (File.Exists(configFile))
+{
+ Console.WriteLine($"Readding {configFile} file");
+ try
+ {
+  Dictionary<string, Dictionary<string, string>> config = ReadFile(configFile);
+
+  if (config.ContainsKey("Database"))
+  {
+   var dbConfig = config["Database"];
+   // Type=MySQL
+   // Server=localhost
+   // Port=3306
+   // Database=inventory_db
+   // uid=root
+   // pwd=plutomarsD1206
+   connectionString = $"Server={dbConfig["Server"]};Port={dbConfig["Port"]};Database={dbConfig["Database"]};uid={dbConfig["uid"]};pwd={dbConfig["pwd"]}";
+   Console.WriteLine($"Readding file finished!!");
+  }
+ }
+ catch (Exception ex)
+ {
+  Console.WriteLine($"Error in reading file: {ex.Message}");
+  // thorw;
+  connectionString = MYSQL_CONNECTION_STRING;
+ }
+}
+else
+{
+ Console.WriteLine($"Error in reading file: {configFile} is not exists.");
+}
+
+// MySqlProductRepository productRepository = new MySqlProductRepository(MYSQL_CONNECTION_STRING);
+MySqlProductRepository productRepository = new MySqlProductRepository(connectionString);
 InventoryService inventoryService = new InventoryService(productRepository);
 
 //通知功能相關
@@ -198,4 +236,34 @@ decimal ReadDecimalInput(decimal defaultValue = 0.0m)
   }
  }
  
+}
+
+Dictionary<string, Dictionary<string, string>> ReadFile(string s)
+{
+ var config = new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
+ string currentSection = "";
+
+ foreach (string line in File.ReadLines(s))
+ {
+  string trimmedLine = line.Trim(); //去掉所有空格!!
+  if (trimmedLine.StartsWith("#") || string.IsNullOrWhiteSpace(trimmedLine)) // # 表示註釋; 跳過註釋 & 跳過空白行
+  {
+   continue; // 跳過註釋和空行
+  }
+
+  if (trimmedLine.StartsWith("[") && trimmedLine.EndsWith("]")) // 找到有中括號的那一行!!
+  {
+   currentSection = trimmedLine.Substring(1, trimmedLine.Length - 2); // 取得index 為 1 的字母開始到 index 為 倒數2 的字母
+   config[currentSection] = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+  }
+  else if (currentSection != "" && trimmedLine.Contains("="))
+   // 取得 [] 取出來的 key 對應的 value!!! (但這個 value 將被 = 拆分成作為 value 的 Dictionay 的 key 跟 value)
+  {
+   int equalsIndex = trimmedLine.IndexOf('=');
+   string key = trimmedLine.Substring(0, equalsIndex).Trim();
+   string value = trimmedLine.Substring(equalsIndex + 1).Trim();
+   config[currentSection][key] = value;
+  }
+ }
+ return config;
 }
