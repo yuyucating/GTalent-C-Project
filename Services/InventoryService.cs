@@ -143,14 +143,12 @@ public class InventoryService
         }
     }
 
-    public List<Product> CheckOutOfStockProducts()
+    public List<Product> CheckLowStockProducts()
     {
         try
         {
-            List<Product> OutOfStockProducts = _productRepository.GetAllProducts();
-            
-            var results = OutOfStockProducts.Where(product => product.Status == Product.ProductStatus.LowStock || product.Quantity < 10).ToList();
-            
+            List<Product> LowStockProducts = _productRepository.GetAllProducts();
+            var results = LowStockProducts.Where(product => product.Status == Product.ProductStatus.LowStock || product.Quantity < 10).ToList();
             if (!results.Any())
             {
                 Console.WriteLine("No products found!");
@@ -161,6 +159,25 @@ public class InventoryService
         {
             Console.WriteLine($"Error in checking low-stock product:{e.Message}");
             return new List<Product>();
+        }
+    }
+
+    public List<Product> CheckOutOfStockProducts()
+    {
+        try
+        {
+            List<Product> products = _productRepository.CheckOutOfStockProducts(); //呼叫介面 (不是呼叫實作物件) - DI
+            if (!products.Any())
+            {
+                Console.WriteLine("No products found!");
+            }
+          
+            return products;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Error in check products:{e.Message}");
+            return new List<Product>(); //回傳空 Product: 不會抱錯
         }
     }
 }

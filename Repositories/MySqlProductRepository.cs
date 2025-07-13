@@ -174,30 +174,30 @@ public class MySqlProductRepository : IProductRepository
         }
     }
 
-    // public List<Product> CheckOutOfStockProducts()
-    // {
-    //     List<Product> products = new List<Product>();
-    //     using (var connection = new MySqlConnection(_connectionString))
-    //     {
-    //         connection.Open();
-    //         string selectSql = "SELECT * FROM product WHERE status=2"; // 所有 product 這個 table 裡的資料 (很多個 product)
-    //         using (MySqlCommand cmd = new MySqlCommand(selectSql, connection))
-    //         {
-    //             using (MySqlDataReader reader = cmd.ExecuteReader())  // 他會取得很多筆, 自己會迭代, 所以要搭配 while!!
-    //             {   
-    //                 while (reader.Read())  // 因為不知道有幾筆資料, 所以用 while()
-    //                 {
-    //                     products.Add(new Product(reader.GetInt32("id"), 
-    //                         reader.GetString("name"), 
-    //                         reader.GetDecimal("price"), 
-    //                         reader.GetInt32("quantity"))
-    //                     {
-    //                         Status = (Product.ProductStatus)reader.GetInt32("status")
-    //                     });
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     return products;
-    // }
+    public List<Product> CheckOutOfStockProducts()
+    {
+        List<Product> products = new List<Product>();
+        using (var connection = new MySqlConnection(_connectionString))
+        {
+            connection.Open();
+            string selectSql = "SELECT * FROM product WHERE status=2";
+            using (MySqlCommand cmd = new MySqlCommand(selectSql, connection))
+            {
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {   
+                    while (reader.Read())  // 因為不知道有幾筆資料, 所以用 while()
+                    {
+                        products.Add(new Product(reader.GetInt32("id"), 
+                            reader.GetString("name"), 
+                            reader.GetDecimal("price"), 
+                            reader.GetInt32("quantity"))
+                        {
+                            Status = (Product.ProductStatus)reader.GetInt32("status")
+                        });
+                    }
+                }
+            }
+        }
+        return products;
+    }
 }

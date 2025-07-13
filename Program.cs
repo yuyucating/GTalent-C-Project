@@ -74,7 +74,9 @@ void RunMenu()
     break;
    case "5": SearchProduct();
     break;
-   case "6": CheckOutOfStockProducts();
+   case "6": CheckLowStockProducts();
+    break;
+   case "7": CheckOutOfStockProducts();
     break;
    case "0":
     Console.WriteLine("Goodbye");
@@ -93,6 +95,7 @@ void DisplayMenu()
  Console.WriteLine("4. Update product");
  Console.WriteLine("5. Search product");
  Console.WriteLine("6. Check products with low stock");
+ Console.WriteLine("7. Check Products which are out of stock");
  Console.WriteLine("0. Exit");
 }
 
@@ -191,12 +194,29 @@ void UpdateProduct()
  }
 }
 
+void CheckLowStockProducts()
+{
+ var products = inventoryService.CheckLowStockProducts();
+ if (products!=null)
+ {
+  Console.WriteLine("======= Product with Low Stock =======");
+  Console.WriteLine("---------------------------------------");
+  Console.WriteLine("ID | Name | Price | Quantity | Status");
+  Console.WriteLine("---------------------------------------");
+  foreach (var product in products)
+  {
+   Console.WriteLine(product);
+  }
+  Console.WriteLine("---------------------------------------");
+ }
+}
+
 void CheckOutOfStockProducts()
 {
  var products = inventoryService.CheckOutOfStockProducts();
  if (products!=null)
  {
-  Console.WriteLine("======= Product with Low Stock =======");
+  Console.WriteLine("======= Products which are Out of Stock =======");
   Console.WriteLine("---------------------------------------");
   Console.WriteLine("ID | Name | Price | Quantity | Status");
   Console.WriteLine("---------------------------------------");
