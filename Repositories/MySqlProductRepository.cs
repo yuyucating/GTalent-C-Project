@@ -161,13 +161,14 @@ public class MySqlProductRepository : IProductRepository
         using (var connection = new MySqlConnection(_connectionString))
         {
             connection.Open();
-            string updateSql = @"UPDATE product SET name=@name, price=@price, quantity=@quantity WHERE id=@id";
+            string updateSql = @"UPDATE product SET name=@name, price=@price, quantity=@quantity, status=@status WHERE id=@id";
             using (MySqlCommand cmd = new MySqlCommand(updateSql, connection))
             {
                 cmd.Parameters.AddWithValue("@name", product.Name);
                 cmd.Parameters.AddWithValue("@price", product.Price);
                 cmd.Parameters.AddWithValue("@quantity", product.Quantity);
                 cmd.Parameters.AddWithValue("@id", product.Id);
+                cmd.Parameters.AddWithValue("@status", product.Status);
                 
                 cmd.ExecuteNonQuery();
             }
