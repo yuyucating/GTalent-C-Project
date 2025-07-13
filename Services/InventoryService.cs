@@ -39,7 +39,8 @@ public class InventoryService
         }
     }
 
-    public Product GetProductByID(int id)
+    // public Product GetProductByID(int id) -- 改使用泛型
+    public OperationResult<Product> GetProductByID(int id)
     {
         try
         {
@@ -47,14 +48,16 @@ public class InventoryService
             if (product == null)
             {
                 Console.WriteLine("No products found!");
+                return OperationResult<Product>.ErrorResult("Product not found.");
             }
-
-            return product;
+            // return product; -- 改使用泛型
+            return OperationResult<Product>.SuccessResult("Operation success.", product);
         }
         catch (Exception e)
         {
             Console.WriteLine($"Error in reading product with ID {id}:{e.Message}");
-            return new Product();
+            // return new Product(); -- 改使用泛型
+            return OperationResult<Product>.ErrorResult("Operation fail.");
         }
     }
 
@@ -103,11 +106,15 @@ public class InventoryService
                 throw new ArgumentException("Quantity can not be lower than zero!");
             }
             // 嘗試透過 Repo 處理 UpdateProduct
+            // Console.WriteLine("HERRRRRRRE!!!");
             product.Name = name;
             product.Price = price;
             product.Quantity = quantity;
+            // Console.WriteLine(product);
+            product.UpdateStatus();
+            // Console.WriteLine(product);
             _productRepository.UpdateProduct(product);
-            Console.WriteLine($"Complete product with ID {product.Id} updating.");
+            Console.WriteLine($"Complete product with ID {product.Id} ({product.Name}) updating.");
         }
         catch (Exception e)
         {
@@ -160,7 +167,7 @@ public class InventoryService
             Console.WriteLine($"Error in checking low-stock product:{e.Message}");
             return new List<Product>();
         }
-    }
+    }       
 
     public List<Product> CheckOutOfStockProducts()
     {
@@ -179,5 +186,23 @@ public class InventoryService
             Console.WriteLine($"Error in check products:{e.Message}");
             return new List<Product>(); //回傳空 Product: 不會抱錯
         }
+    }
+
+    public Product AdjustProductQuantity(Product product, int quantity)
+    {
+        product.Quantity += quantity;
+        product.UpdateStatus();
+        try
+        {
+            _productRepository.UpdateProduct(product);
+            Console.WriteLine($"Complete product with ID {product.Id} ({product.Name}) updating.");
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Error in updating product: {e.Message}");
+        }
+
+        Console.WriteLine($"Adjust product quantity with ID {product.Id} ({product.Name}) updating.\n");
+        return product;
     }
 }

@@ -78,6 +78,8 @@ void RunMenu()
     break;
    case "7": CheckOutOfStockProducts();
     break;
+   case "8": AdjustProductQuantity();
+    break;
    case "0":
     Console.WriteLine("Goodbye");
     return;
@@ -96,6 +98,7 @@ void DisplayMenu()
  Console.WriteLine("5. Search product");
  Console.WriteLine("6. Check products with low stock");
  Console.WriteLine("7. Check Products which are out of stock");
+ Console.WriteLine("8. Adjust product quantity");
  Console.WriteLine("0. Exit");
 }
 
@@ -124,13 +127,14 @@ void SearchProductByID()
  int input = ReadIntInput();
  
  // InventoryService inventoryService = new InventoryService(productRepository);
- var product = inventoryService.GetProductByID(input);
+ // var product = inventoryService.GetProductByID(input);
+ OperationResult<Product> product = inventoryService.GetProductByID(input);
  if (product!=null)
  {
   Console.WriteLine("---------------------------------------");
   Console.WriteLine("ID | Name | Price | Quantity | Status");
   Console.WriteLine("---------------------------------------");
-  Console.WriteLine(product);
+  Console.WriteLine(product.Data);
   Console.WriteLine("---------------------------------------");
  }
 }
@@ -175,22 +179,37 @@ void UpdateProduct()
  int id = ReadIntInput(1);
  
  // 找到對應產品
- Product product = inventoryService.GetProductByID(id);
- string name = product.Name;
- decimal price = product.Price;
- int quantity = product.Quantity;
+ // Product product = inventoryService.GetProductByID(id); -- 改使用泛型
+ OperationResult<Product> product = inventoryService.GetProductByID(id);
+ if (product.Success)
+ {
+  Console.WriteLine(product.Message);
+  Console.WriteLine("======= Product to be Updated =======");
+  Console.WriteLine("---------------------------------------");
+  Console.WriteLine("ID | Name | Price | Quantity | Status");
+  Console.WriteLine("---------------------------------------");
+  Console.WriteLine(product.Data);
+  Console.WriteLine("---------------------------------------");
+  // return;
+ }
 
  if (product != null)
  {
   Console.WriteLine("\nPlease key in new product name:");
-  name = Console.ReadLine();
+  string name = Console.ReadLine();
   Console.WriteLine("\nPlease key in new product price:");
-  price = ReadDecimalInput();
+  decimal price = ReadDecimalInput();
   Console.WriteLine("\nPlease key in new product quantity:");
-  quantity = ReadIntInput();
+  int quantity = ReadIntInput();
   
   // 進行更新
-  inventoryService.UpdateProduct(product, name, price, quantity);
+  inventoryService.UpdateProduct(product.Data, name, price, quantity);
+  Console.WriteLine("======= Updated Product =======");
+  Console.WriteLine("---------------------------------------");
+  Console.WriteLine("ID | Name | Price | Quantity | Status");
+  Console.WriteLine("---------------------------------------");
+  Console.WriteLine(product.Data);
+  Console.WriteLine("---------------------------------------");
  }
 }
 
@@ -224,6 +243,33 @@ void CheckOutOfStockProducts()
   {
    Console.WriteLine(product);
   }
+  Console.WriteLine("---------------------------------------");
+ }
+}
+
+void AdjustProductQuantity()
+{
+ Console.WriteLine("\nPlease key in product id to be adjusted:");
+ int id = ReadIntInput(1);
+ // 找到對應產品
+ // Product product = inventoryService.GetProductByID(id);
+ OperationResult<Product> product = inventoryService.GetProductByID(id);
+ // Console.WriteLine($"\n{product.Name}'s quantity: {product.Quantity}");
+
+ if (product != null)
+ {
+  Console.WriteLine("\nPlease key in quantity to be adjusted (positive: stock-in / negative: stock-out):");
+  int quantity = ReadIntInput();
+  // product = inventoryService.AdjustProductQuantity(product, quantity);
+  inventoryService.AdjustProductQuantity(product.Data, quantity);
+ }
+ if (product!=null)
+ {
+  Console.WriteLine("======= Adjusted Product =======");
+  Console.WriteLine("---------------------------------------");
+  Console.WriteLine("ID | Name | Price | Quantity | Status");
+  Console.WriteLine("---------------------------------------");
+  Console.WriteLine(product.Data);
   Console.WriteLine("---------------------------------------");
  }
 }
