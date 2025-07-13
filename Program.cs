@@ -12,7 +12,6 @@ using System.Collections.Generic;
  Database: SQL 以 CREATE DATABASE 的名字;
  uid: mysql使用者名稱;
  pwd: mysql使用者密碼*/
-const string MYSQL_CONNECTION_STRING = "Server=localhost;Port=3306;Database=inventory_db;uid=root;pwd=plutomarsD1206";
 
 string connectionString = "";
 string configFile = "appsettings.ini";
@@ -27,12 +26,6 @@ if (File.Exists(configFile))
   if (config.ContainsKey("Database"))
   {
    var dbConfig = config["Database"];
-   // Type=MySQL
-   // Server=localhost
-   // Port=3306
-   // Database=inventory_db
-   // uid=root
-   // pwd=plutomarsD1206
    connectionString = $"Server={dbConfig["Server"]};Port={dbConfig["Port"]};Database={dbConfig["Database"]};uid={dbConfig["uid"]};pwd={dbConfig["pwd"]}";
    Console.WriteLine($"Readding file finished!!");
   }
@@ -41,7 +34,7 @@ if (File.Exists(configFile))
  {
   Console.WriteLine($"Error in reading file: {ex.Message}");
   // thorw;
-  connectionString = MYSQL_CONNECTION_STRING;
+  // connectionString = MYSQL_CONNECTION_STRING;
  }
 }
 else
@@ -73,11 +66,15 @@ void RunMenu()
   {
    case "1": GetAllProducts();
     break;
-   case "2": SearchProduct();
+   case "2": SearchProductByID();
     break;
    case "3": AddProduct();
     break;
    case "4": UpdateProduct();
+    break;
+   case "5": SearchProduct();
+    break;
+   case "6": CheckOutOfStockProducts();
     break;
    case "0":
     Console.WriteLine("Goodbye");
@@ -91,9 +88,11 @@ void DisplayMenu()
  Console.WriteLine("Welcome to Inventory System!");
  Console.WriteLine("What would you like to do?");
  Console.WriteLine("1. Get all product");
- Console.WriteLine("2. Search product");
+ Console.WriteLine("2. Search product by ID");
  Console.WriteLine("3. Add product");
  Console.WriteLine("4. Update product");
+ Console.WriteLine("5. Search product");
+ Console.WriteLine("6. Check products with low stock");
  Console.WriteLine("0. Exit");
 }
 
@@ -116,7 +115,7 @@ void GetAllProducts()
  }
 }
 
-void SearchProduct()
+void SearchProductByID()
 {
  Console.WriteLine("\n=== Key in the product ID ===");
  int input = ReadIntInput();
@@ -129,6 +128,25 @@ void SearchProduct()
   Console.WriteLine("ID | Name | Price | Quantity | Status");
   Console.WriteLine("---------------------------------------");
   Console.WriteLine(product);
+  Console.WriteLine("---------------------------------------");
+ }
+}
+
+void SearchProduct()
+{
+ Console.WriteLine("\nPlease key in the keyword:");
+ string input = Console.ReadLine();
+ List<Product> products = inventoryService.SearchProduct(input);
+ if (products.Any())
+ {
+  Console.WriteLine($"--- Searching condition is: {input} --");
+  Console.WriteLine("---------------------------------------");
+  Console.WriteLine("ID | Name | Price | Quantity | Status");
+  Console.WriteLine("---------------------------------------");
+  foreach (var product in products)
+  {
+   Console.WriteLine(product);
+  }
   Console.WriteLine("---------------------------------------");
  }
 }
@@ -170,6 +188,23 @@ void UpdateProduct()
   
   // 進行更新
   inventoryService.UpdateProduct(product, name, price, quantity);
+ }
+}
+
+void CheckOutOfStockProducts()
+{
+ var products = inventoryService.CheckOutOfStockProducts();
+ if (products!=null)
+ {
+  Console.WriteLine("======= Product with Low Stock =======");
+  Console.WriteLine("---------------------------------------");
+  Console.WriteLine("ID | Name | Price | Quantity | Status");
+  Console.WriteLine("---------------------------------------");
+  foreach (var product in products)
+  {
+   Console.WriteLine(product);
+  }
+  Console.WriteLine("---------------------------------------");
  }
 }
 
