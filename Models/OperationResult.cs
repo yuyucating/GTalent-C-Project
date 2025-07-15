@@ -23,11 +23,11 @@ public class OperationResult<T> // 泛型
     // 讓使用者使用泛型, 而非直接將建構子丟給使用者
     public static OperationResult<T> SuccessResult(string message, T data)
     {
-        return new OperationResult<T>(message, data);
+        return new OperationResult<T>(message, data);  // 輸出message 並建立 Product
     }
 
     public static OperationResult<T> ErrorResult(string message)
     {
-        return new OperationResult<T>(message);
+        return new OperationResult<T>(message); // 只輸出 message
     }
 }

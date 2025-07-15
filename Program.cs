@@ -143,14 +143,14 @@ void SearchProduct()
 {
  Console.WriteLine("\nPlease key in the keyword:");
  string input = Console.ReadLine();
- List<Product> products = inventoryService.SearchProduct(input);
- if (products.Any())
+ OperationResult<List<Product>> products = inventoryService.SearchProduct(input);
+ if (products.Data.Any())
  {
   Console.WriteLine($"--- Searching condition is: {input} --");
   Console.WriteLine("---------------------------------------");
   Console.WriteLine("ID | Name | Price | Quantity | Status");
   Console.WriteLine("---------------------------------------");
-  foreach (var product in products)
+  foreach (var product in products.Data)
   {
    Console.WriteLine(product);
   }

@@ -122,17 +122,18 @@ public class InventoryService
         }
     }
 
-    public List<Product> SearchProduct(string? input)
+    // public List<Product> SearchProduct(string? input)
+    public OperationResult<List<Product>> SearchProduct(string? input)
     {
         try
         {
             List<Product> products = _productRepository.GetAllProducts(); //呼叫介面 (不是呼叫實作物件) - DI
             if (string.IsNullOrWhiteSpace(input))
             {
-                return products;
+                return OperationResult<List<Product>>.ErrorResult("No product found.");
                 // 如果是空白或是 null 就列出所有的 products
             }
-            
+            // OperationResult<Product>.SuccessResult($"Found product(s)!", products);
             var results = products.Where(product => product.Name.ToLower().Contains(input.ToLower()))
                 .OrderBy(product => product.Name)
                 .ToList();
@@ -140,13 +141,14 @@ public class InventoryService
             if (!results.Any())
             {
                 Console.WriteLine("No products found!");
+                // OperationResult<Product>.ErrorResult("No product found!");
             }
-            return results;
+            return OperationResult<List<Product>>.SuccessResult("No products found!", results);
         }
         catch (Exception e)
         {
-            Console.WriteLine($"Error in reading all products:{e.Message}");
-            return new List<Product>(); //回傳空 Product: 不會抱錯
+            // Console.WriteLine($"Error in reading all products:{e.Message}");
+            return OperationResult<List<Product>>.ErrorResult($"Error in reading all products:{e.Message}"); //回傳空 Product: 不會抱錯
         }
     }
 
