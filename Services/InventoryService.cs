@@ -207,4 +207,17 @@ public class InventoryService
         Console.WriteLine($"Adjust product quantity with ID {product.Id} ({product.Name}) updating.\n");
         return product;
     }
+
+    public void DeleteProduct(int id)
+    {
+        try
+        {
+            _productRepository.DeleteProduct(id);
+            Console.WriteLine($"Deleted product with ID {id}.");
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Error in deleting product: {e.Message}");
+        }
+    }
 }

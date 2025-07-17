@@ -52,7 +52,7 @@ public class MySqlProductRepository : IProductRepository
         using (var connection = new MySqlConnection(_connectionString))
         {
             connection.Open();
-            string selectSql = "SELECT * FROM product"; // 所有 product 這個 table 裡的資料 (很多個 product)
+            string selectSql = "SELECT * FROM product WHERE is_delete=true"; // 所有 product 這個 table 裡的資料 (很多個 product)
             using (MySqlCommand cmd = new MySqlCommand(selectSql, connection))
             {
                 using (MySqlDataReader reader = cmd.ExecuteReader())  // 他會取得很多筆, 自己會迭代, 所以要搭配 while!!
@@ -200,5 +200,19 @@ public class MySqlProductRepository : IProductRepository
             }
         }
         return products;
+    }
+
+    public void DeleteProduct(int id)
+    {
+        using (var connection = new MySqlConnection(_connectionString))
+        {
+            connection.Open();
+            string deleteSql = "UPDATE product SET is_delete=false WHERE id=@id";
+            using (MySqlCommand cmd = new MySqlCommand(deleteSql, connection))
+            {
+                cmd.Parameters.AddWithValue("@id", id);
+                cmd.ExecuteNonQuery();
+            }
+        }
     }
 }

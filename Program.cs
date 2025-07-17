@@ -6,6 +6,8 @@ using InventorySystem.Services;
 using InventorySystem.Utils;
 using System;
 using System.Collections.Generic;
+using Org.BouncyCastle.Crypto;
+using ZstdSharp.Unsafe;
 
 /* Server: mysql所在伺服器位址(localhost or ip xxx.xxx.xxx.xxx);
  Port: mysql端口 (預設 3306);
@@ -80,6 +82,8 @@ void RunMenu()
     break;
    case "8": AdjustProductQuantity();
     break;
+   case "9": DeleteProduct();
+    break;
    case "0":
     Console.WriteLine("Goodbye");
     return;
@@ -89,6 +93,7 @@ void RunMenu()
 
 void DisplayMenu()
 {
+ Console.WriteLine("\n。 。 。 。 。 。 。 。 。 。 。");
  Console.WriteLine("Welcome to Inventory System!");
  Console.WriteLine("What would you like to do?");
  Console.WriteLine("1. Get all product");
@@ -99,6 +104,7 @@ void DisplayMenu()
  Console.WriteLine("6. Check products with low stock");
  Console.WriteLine("7. Check Products which are out of stock");
  Console.WriteLine("8. Adjust product quantity");
+ Console.WriteLine("9. Delete product");
  Console.WriteLine("0. Exit");
 }
 
@@ -117,7 +123,6 @@ void GetAllProducts()
    Console.WriteLine(product);
   }
   Console.WriteLine("---------------------------------------");
-  emailService.NotifyUser("Mickey", "Finish searching.");
  }
 }
 
@@ -169,7 +174,7 @@ void AddProduct()
  Console.WriteLine($"Product name:{name}, Price:{price}, Quantity:{quantity}");
  // productRepository.AddProduct(name, price, quantity);
  
- smsService.NotifyUser("Mickey", $"Finish adding product: {name}.");
+ smsService.NotifyUser("Admin", $"Finish adding product: {name}.");
  inventoryService.AddProduct(name, price , quantity);
 }
 
@@ -184,7 +189,7 @@ void UpdateProduct()
  if (product.Success)
  {
   Console.WriteLine(product.Message);
-  Console.WriteLine("======= Product to be Updated =======");
+  Console.WriteLine("\n======= Product to be Updated =======");
   Console.WriteLine("---------------------------------------");
   Console.WriteLine("ID | Name | Price | Quantity | Status");
   Console.WriteLine("---------------------------------------");
@@ -204,7 +209,7 @@ void UpdateProduct()
   
   // 進行更新
   inventoryService.UpdateProduct(product.Data, name, price, quantity);
-  Console.WriteLine("======= Updated Product =======");
+  Console.WriteLine("\n======= Updated Product =======");
   Console.WriteLine("---------------------------------------");
   Console.WriteLine("ID | Name | Price | Quantity | Status");
   Console.WriteLine("---------------------------------------");
@@ -218,7 +223,7 @@ void CheckLowStockProducts()
  var products = inventoryService.CheckLowStockProducts();
  if (products!=null)
  {
-  Console.WriteLine("======= Product with Low Stock =======");
+  Console.WriteLine("\n======= Product with Low Stock =======");
   Console.WriteLine("---------------------------------------");
   Console.WriteLine("ID | Name | Price | Quantity | Status");
   Console.WriteLine("---------------------------------------");
@@ -235,7 +240,7 @@ void CheckOutOfStockProducts()
  var products = inventoryService.CheckOutOfStockProducts();
  if (products!=null)
  {
-  Console.WriteLine("======= Products which are Out of Stock =======");
+  Console.WriteLine("\n======= Products which are Out of Stock =======");
   Console.WriteLine("---------------------------------------");
   Console.WriteLine("ID | Name | Price | Quantity | Status");
   Console.WriteLine("---------------------------------------");
@@ -271,6 +276,56 @@ void AdjustProductQuantity()
   Console.WriteLine("---------------------------------------");
   Console.WriteLine(product.Data);
   Console.WriteLine("---------------------------------------");
+  
+  emailService.NotifyUser("Admin", $"The information of the product, {product.Data.Name}, has been adjusted.");
+  smsService.NotifyUser("Admin", $"The information of the product, {product.Data.Name}, has been adjusted.");
+ }
+}
+
+void DeleteProduct()
+{
+ bool deleteContinue = true;
+ while (deleteContinue)
+ {
+  Console.WriteLine("\nPlease key in product to be deleted with its id:");
+  int id = ReadIntInput();
+  OperationResult<Product> product = inventoryService.GetProductByID(id);
+  if (product.Success)
+  {
+   Console.WriteLine(product.Message);
+   Console.WriteLine("\n======= Product to be deleted =======");
+   Console.WriteLine("---------------------------------------");
+   Console.WriteLine("ID | Name | Price | Quantity | Status");
+   Console.WriteLine("---------------------------------------");
+   Console.WriteLine(product.Data);
+   Console.WriteLine("---------------------------------------");
+   bool checkContinue = true;
+   while (checkContinue)
+   {
+    Console.WriteLine("\nAre you sure to delete this product? y/n");
+    string input = Console.ReadLine().ToLower();
+    switch (input)
+    {
+     case "y":
+      inventoryService.DeleteProduct(id);
+      Console.WriteLine("Product deleted!");
+      checkContinue = false;
+      break;
+     case "n":
+      Console.WriteLine("Operation cancelled ");
+      checkContinue = false;
+      break;
+     default:
+      Console.WriteLine("Please try again.");
+      break;
+    }
+   }
+   deleteContinue = false;
+  }
+  else
+  {
+   deleteContinue =  true;
+  }
  }
 }
 
