@@ -10,4 +10,5 @@ public interface IProductRepository
     int GetNextProductID();
     void UpdateProduct(Product product);
     List<Product> CheckOutOfStockProducts();
+    void DeleteProduct(int id);
 }

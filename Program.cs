@@ -46,7 +46,9 @@ else
 
 // MySqlProductRepository productRepository = new MySqlProductRepository(MYSQL_CONNECTION_STRING);
 MySqlProductRepository productRepository = new MySqlProductRepository(connectionString);
+MySqlSupplierRepository supplierRepository = new MySqlSupplierRepository(connectionString);
 InventoryService inventoryService = new InventoryService(productRepository);
+SupplierService supplierService = new SupplierService(supplierRepository);
 
 //通知功能相關
 // 使用 EmailNotifier
@@ -84,6 +86,8 @@ void RunMenu()
     break;
    case "9": DeleteProduct();
     break;
+   case "10": RunSupplierMenu();
+    break;
    case "0":
     Console.WriteLine("Goodbye");
     return;
@@ -105,6 +109,7 @@ void DisplayMenu()
  Console.WriteLine("7. Check Products which are out of stock");
  Console.WriteLine("8. Adjust product quantity");
  Console.WriteLine("9. Delete product");
+ Console.WriteLine("10. Manage Suppliers");
  Console.WriteLine("0. Exit");
 }
 
@@ -327,6 +332,66 @@ void DeleteProduct()
    deleteContinue =  true;
   }
  }
+}
+
+void RunSupplierMenu()
+{
+ while (true)
+ {
+  Console.WriteLine("\n[ Supplier Management Menu ]");
+  Console.WriteLine("1. Get all supplier");
+  Console.WriteLine("2. Search supplier by ID");
+  Console.WriteLine("3. Add supplier");
+  Console.WriteLine("4. Update supplier");
+  Console.WriteLine("5. Search supplier by keywords");
+  Console.WriteLine("6. Adjust product quantity");
+  Console.WriteLine("7. Delete Supplier");
+  Console.WriteLine("0. Back to previous menu");
+  string choice = Console.ReadLine();
+  switch (choice)
+  {
+   case "1": GetAllSuppliers();
+    break;
+   case "3": AddSupplier();
+    break;
+   case "0":
+    return;
+  };
+ }
+}
+
+void GetAllSuppliers()
+{
+ Console.WriteLine("\n==== Get All Suppliers ====");
+ List<Supplier> suppliers = supplierService.GetAllSuppliers();
+ if (suppliers.Any()) // .Any() 去了解 products 有沒有元素 (而不是單純 products 存不存在)
+ {
+  Console.WriteLine("---------------------------------------");
+  Console.WriteLine("ID | Name | Address | Phone | e-mail");
+  Console.WriteLine("---------------------------------------");
+  foreach (var supplier in suppliers)
+  {
+   Console.WriteLine(supplier);
+  }
+  Console.WriteLine("---------------------------------------");
+ }
+}
+
+void AddSupplier()
+{
+ Console.WriteLine("\n==== Add Supplier ====");
+ Console.WriteLine("\nPlease key in supplier name:");
+ string name = Console.ReadLine();
+ Console.WriteLine("\nPlease key in supplier address:");
+ string address = Console.ReadLine();
+ Console.WriteLine("\nPlease key in supplier phone:");
+ string phone = Console.ReadLine();
+ Console.WriteLine("\nPlease key in supplier email:");
+ string email = Console.ReadLine();
+ Console.WriteLine($"Supplier name:{name}, address:{address}, phone:{phone},  email:{email}");
+ 
+ smsService.NotifyUser("Admin", $"Finish adding supplier: {name}.");
+ supplierService.AddSupplier(name, address, phone, email);
 }
 
 // 確定輸入為數字格式

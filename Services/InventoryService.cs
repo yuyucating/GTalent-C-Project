@@ -22,7 +22,7 @@ public class InventoryService
             List<Product> products = _productRepository.GetAllProducts(); //呼叫介面 (不是呼叫實作物件) - DI
             if (!products.Any())
             {
-                Console.WriteLine("No products found!");
+                Console.WriteLine("No products were found!");
             }
             
             // //使用 EmailNotifier
