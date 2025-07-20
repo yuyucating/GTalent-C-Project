@@ -16,6 +16,36 @@ public class SupplierService
     {
         try
         {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException("Supplier name cannot be null or empty");
+            }
+
+            if (string.IsNullOrWhiteSpace(address))
+            {
+                throw new ArgumentException("Supplier address cannot be null or empty");
+            }
+
+            if (string.IsNullOrWhiteSpace(phone))
+            {
+                throw new ArgumentException("Supplier's phone cannot be null or empty");
+            }
+
+            if (phone.Length != 10)
+            {
+                throw new ArgumentException("Length of supplier's phone number should be 10");
+            }
+
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                throw new ArgumentException("Supplier's email cannot be null or empty");
+            }
+            
+            if (!email.Contains("@"))
+            {
+                throw new ArgumentException("Supplier's email should contain '@'");
+            }
+
             Supplier supplier = new Supplier(_supplierRepository.GetNextSupplierID(), name, address, phone, email);
             _supplierRepository.AddSupplier(supplier);
         }

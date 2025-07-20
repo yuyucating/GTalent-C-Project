@@ -28,9 +28,10 @@ public class MySqlProductRepository : IProductRepository
                         name VARCHAR(10) NOT NULL,
                         price DECIMAL(10,2) NOT NULL,
                         quantity INT NOT NULL,
-                        status INT NOT NULL
+                        status INT NOT NULL,
+                        supplier_id INT,
+                        FOREIGN KEY(supplier_id) REFERENCES supplier(id)
                     )
-     
                 "; // @可以換行的字串 (???) , 可以跟 $"" 做比較???
                 // cmd 命令: 把我們的字串(連線) 執行 connection
                 using MySqlCommand cmd = new MySqlCommand(createTableSql, connection); // MySqlCommand 執行 SQL 語句(?)
@@ -52,31 +53,35 @@ public class MySqlProductRepository : IProductRepository
         using (var connection = new MySqlConnection(_connectionString))
         {
             connection.Open();
-            string selectSql = "SELECT * FROM product WHERE is_delete=false"; // 所有 product 這個 table 裡的資料 (很多個 product)
+            string selectSql = "SELECT * FROM product WHERE is_deleted=false"; // 所有 product 這個 table 裡的資料 (很多個 product)
             using (MySqlCommand cmd = new MySqlCommand(selectSql, connection))
             {
                 using (MySqlDataReader reader = cmd.ExecuteReader())  // 他會取得很多筆, 自己會迭代, 所以要搭配 while!!
                 {   
                     // 一筆資料一筆資料讀取 (列)
-                    while (reader.Read())  // 因為不知道有幾筆資料, 所以用 while()
+                    while (reader.Read())
                     {
+                        // int supplierId;
+                        // if (reader.IsDBNull(reader.GetInt32("supplier_id")))
+                        // {
+                        //     supplierId = 0;
+                        // }
+                        // else
+                        // {
+                        //     supplierId = reader.GetInt32("supplier_id");
+                        // }
+
                         // 將獨到的資料丟掉 Product 裡面!! 再丟到 List 裡面收起來 [obj initializer]
                         products.Add(new Product(reader.GetInt32("id"), 
                             reader.GetString("name"), 
                             reader.GetDecimal("price"), 
-                            reader.GetInt32("quantity"))
+                            reader.GetInt32("quantity"),
+                            SafeGetInt32(reader, "supplier_id", -999)
+                            )
                         {
                             Status = (Product.ProductStatus)reader.GetInt32("status")
                         });
-                        
-                        // 傳統寫法:
-                        // Product product = new Product(reader.GetInt32("id"),
-                        //     reader.GetString("name"),
-                        //     reader.GetDecimal("price"),
-                        //     reader.GetInt32("quantity"));
-                        // product.Status = (Product.ProductStatus)reader.GetInt32("status");
-                        // products.Add(product);
-                        
+                        Console.WriteLine("[Product] MySql <UNK>");
                     }
                 }
             }
@@ -104,7 +109,8 @@ public class MySqlProductRepository : IProductRepository
                         product = new Product(reader.GetInt32("id"),
                             reader.GetString("name"),
                             reader.GetDecimal("price"),
-                            reader.GetInt32("quantity"))
+                            reader.GetInt32("quantity"),
+                            reader.GetInt32("supplier_id"))
                         {
                             Status = (Product.ProductStatus)reader.GetInt32("status")
                         };
@@ -122,7 +128,7 @@ public class MySqlProductRepository : IProductRepository
         using (var connection = new MySqlConnection(_connectionString))
         {
             connection.Open();
-            string insertSql = "INSERT INTO product (name, price, quantity, status) VALUES (@name, @price, @quantity, @status)";
+            string insertSql = "INSERT INTO product (name, price, quantity, status, supplier_id) VALUES (@name, @price, @quantity, @status, @supplierId)";
             using (MySqlCommand cmd = new MySqlCommand(insertSql, connection))
             {
                 cmd.Parameters.AddWithValue("@id", product.Id);
@@ -130,6 +136,7 @@ public class MySqlProductRepository : IProductRepository
                 cmd.Parameters.AddWithValue("@price", product.Price);
                 cmd.Parameters.AddWithValue("@quantity", product.Quantity);
                 cmd.Parameters.AddWithValue("@status", product.Status);
+                cmd.Parameters.AddWithValue("@supplierId", product.SupplierId);
                 
                 cmd.ExecuteNonQuery();
             }
@@ -191,7 +198,8 @@ public class MySqlProductRepository : IProductRepository
                         products.Add(new Product(reader.GetInt32("id"), 
                             reader.GetString("name"), 
                             reader.GetDecimal("price"), 
-                            reader.GetInt32("quantity"))
+                            reader.GetInt32("quantity"),
+                            reader.GetInt32("supplier_id"))
                         {
                             Status = (Product.ProductStatus)reader.GetInt32("status")
                         });
@@ -213,6 +221,21 @@ public class MySqlProductRepository : IProductRepository
                 cmd.Parameters.AddWithValue("@id", id);
                 cmd.ExecuteNonQuery();
             }
+        }
+    }
+    
+    public static int SafeGetInt32( MySqlDataReader reader, 
+        string columnName, int defaultValue) 
+    {
+        int ordinal = reader.GetOrdinal(columnName);
+
+        if(!reader.IsDBNull(ordinal))
+        {
+            return reader.GetInt32(ordinal);
+        } 
+        else
+        {
+            return defaultValue;
         }
     }
 }

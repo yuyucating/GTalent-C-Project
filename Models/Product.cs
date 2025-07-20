@@ -13,6 +13,8 @@ public class Product
     public decimal Price { get; set; }
     public int Quantity { get; set; }
     public ProductStatus Status { get; set; } // enum 可以做為型別 (像是 static)
+    
+    public int SupplierId { get; set; }
 
     //連接 SQL 的建構子
     public Product()
@@ -20,18 +22,19 @@ public class Product
     }
     
     //建構子
-    public Product(int id, string name, decimal price, int quantity)
+    public Product(int id, string name, decimal price, int quantity, int supplierId)
     {
         Id = id;
         Name = name;
         Price = price;
         Quantity = quantity;
         UpdateStatus();
+        SupplierId = supplierId;
     }
 
     public override string ToString()
     {
-        return $"ID: {Id}, Name: {Name}, Price: {Price}, Quantity: {Quantity}, Status: {Status}";
+        return $"ID: {Id}, Name: {Name}, Price: {Price}, Quantity: {Quantity}, Status: {Status}, SupplierId: {SupplierId}";
     }
 
     public void UpdateStatus()

@@ -176,11 +176,13 @@ void AddProduct()
  decimal price = ReadDecimalInput();
  Console.WriteLine("\nPlease key in product quantity:");
  int quantity = ReadIntInput();
+ Console.WriteLine($"\nPlease key in supplier ID for {name}:");
+ int supplierId = ReadIntInput();
+ 
  Console.WriteLine($"Product name:{name}, Price:{price}, Quantity:{quantity}");
- // productRepository.AddProduct(name, price, quantity);
  
  smsService.NotifyUser("Admin", $"Finish adding product: {name}.");
- inventoryService.AddProduct(name, price , quantity);
+ inventoryService.AddProduct(name, price , quantity, supplierId);
 }
 
 void UpdateProduct()
@@ -392,6 +394,13 @@ void AddSupplier()
  
  smsService.NotifyUser("Admin", $"Finish adding supplier: {name}.");
  supplierService.AddSupplier(name, address, phone, email);
+}
+
+void DeleteSupplier()
+{
+ Console.WriteLine("\n==== Delete Supplier ====");
+ Console.WriteLine("\nPlease key in supplier to be deleted:");
+ int id = ReadIntInput();
 }
 
 // 確定輸入為數字格式

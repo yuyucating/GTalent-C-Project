@@ -25,11 +25,6 @@ public class InventoryService
                 Console.WriteLine("No products were found!");
             }
             
-            // //使用 EmailNotifier
-            // INotifier emailNotifier = new EmailNitifier();
-            // NotificationService emailService = new NotificationService(emailNotifier);
-            // emailService.NotifyUser("Mickey", "Finish.");
-            
             return products;
         }
         catch (Exception e)
@@ -61,7 +56,7 @@ public class InventoryService
         }
     }
 
-    public void AddProduct(string? name, decimal price, int quantity)
+    public void AddProduct(string? name, decimal price, int quantity, int supplierId)
     {
         try
         {
@@ -80,7 +75,7 @@ public class InventoryService
                 throw new ArgumentException("Quantity can not be lower than zero!");
             }
             // 嘗試透過 Repo 處理 add product
-            var product = new Product(_productRepository.GetNextProductID(), name, price, quantity); // 準備好 status
+            var product = new Product(_productRepository.GetNextProductID(), name, price, quantity, supplierId); // 準備好 status
             _productRepository.AddProduct(product);
         }
         catch (Exception e)
