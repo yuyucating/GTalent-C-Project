@@ -89,7 +89,7 @@ public class MySqlSupplierRepository:ISupplierRepository
         }
         return suppliers;
     }
-
+    
     public int GetNextSupplierID()
     {
         using (var connection = new MySqlConnection(_connectionString))
@@ -109,7 +109,34 @@ public class MySqlSupplierRepository:ISupplierRepository
         }
         
     }
-    
+
+    public List<Supplier> SearchSupplierByKeywords(string input)
+    {
+        List<Supplier> suppliers = new List<Supplier>();
+        using (var connection = new MySqlConnection(_connectionString))
+        {
+            connection.Open();
+            string searchSql = "SELECT * FROM suppliers WHERE name LIKE @input";
+            using (MySqlCommand cmd = new MySqlCommand(searchSql, connection))
+            {
+                // cmd.Parameters.AddWithValue("@input", input);
+                cmd.Parameters.AddWithValue("@input", "%" + input + "%");
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        suppliers.Add(new Supplier(reader.GetInt32("id"),
+                            reader.GetString("name"),
+                            reader.GetString("address"),
+                            reader.GetString("phone"),
+                            reader.GetString("email")));
+                    }
+                }
+            }
+        }
+        return suppliers;
+    }
+
     public Supplier GetSupplierById(int id)
     {
         throw new NotImplementedException();

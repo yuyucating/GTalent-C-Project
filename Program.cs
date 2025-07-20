@@ -356,6 +356,8 @@ void RunSupplierMenu()
     break;
    case "3": AddSupplier();
     break;
+   case "5": SearchSupplierByKeywords();
+    break;
    case "0":
     return;
   };
@@ -394,6 +396,26 @@ void AddSupplier()
  
  smsService.NotifyUser("Admin", $"Finish adding supplier: {name}.");
  supplierService.AddSupplier(name, address, phone, email);
+}
+
+void SearchSupplierByKeywords()
+{
+ Console.WriteLine("\n==== Search Supplier by keywords====");
+ Console.WriteLine("\nPlease key in the keyword:");
+ string input = Console.ReadLine();
+ List<Supplier> suppliers = supplierService.SearchSupplierByKeywords(input);
+ if (suppliers.Any())
+ {
+  Console.WriteLine($"--- Searching condition is: {input} --");
+  Console.WriteLine("---------------------------------------");
+  Console.WriteLine("ID | Name | Address | Phone | e-mail");
+  Console.WriteLine("---------------------------------------");
+  foreach (var supplier in suppliers)
+  {
+   Console.WriteLine(supplier);
+  }
+  Console.WriteLine("---------------------------------------");
+ }
 }
 
 void DeleteSupplier()

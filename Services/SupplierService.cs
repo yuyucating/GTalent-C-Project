@@ -72,4 +72,28 @@ public class SupplierService
             return new List<Supplier>(); //回傳空的 List... 不報錯
         }
     }
+
+    public List<Supplier> SearchSupplierByKeywords(string? input)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return new List<Supplier>();
+            }
+
+            List<Supplier> suppliers = _supplierRepository.SearchSupplierByKeywords(input);
+            
+            if (!suppliers.Any()) // 如果 List 裡面沒有東西的話
+            {
+                Console.WriteLine("No supplier were found!");
+            }
+            return suppliers;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Error in searching suppliers: {e.Message}");
+            return new List<Supplier>();
+        }
+    }
 }

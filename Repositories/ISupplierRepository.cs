@@ -13,4 +13,5 @@ public interface ISupplierRepository
     void UpdateSupplier(Supplier supplier);
     void DeleteSupplier(Supplier supplier);
     void ExistSupplier(int id);
+    List<Supplier> SearchSupplierByKeywords(string input);
 }
